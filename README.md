@@ -300,6 +300,3 @@ The bill history and screenshots are from a single private residence, shared by
 the owner for this analysis. No account numbers, addresses or names are
 included.
 
-## Licence
-
-MIT.
