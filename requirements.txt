@@ -1,0 +1,22 @@
+# Core analysis
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+
+# Screenshot extraction
+opencv-python-headless>=4.9
+pytesseract>=0.3.10
+# Also needs the Tesseract OCR binary itself:
+#   Ubuntu/Debian : sudo apt-get install tesseract-ocr
+#   macOS         : brew install tesseract
+#   Windows       : https://github.com/UB-Mannheim/tesseract/wiki
+
+# App and charts
+streamlit>=1.30
+plotly>=5.18
+
+# Explainability
+shap>=0.44
+
+# Tests
+pytest>=7.4

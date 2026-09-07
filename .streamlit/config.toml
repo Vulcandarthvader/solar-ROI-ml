@@ -1,0 +1,12 @@
+# Chrome colours are matched to the validated chart palette in src/theme.py, so
+# Streamlit's own accents never fight the charts.
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f4f3ef"
+textColor = "#0b0b0b"
+font = "sans serif"
+
+[server]
+maxUploadSize = 20
