@@ -1,7 +1,4 @@
 """Central configuration and economic assumptions.
-
-Every number an interviewer might question lives here, with a source, rather
-than being buried as a magic constant inside a model.
 """
 
 from __future__ import annotations
