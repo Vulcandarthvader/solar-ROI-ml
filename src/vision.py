@@ -15,8 +15,7 @@ on the x-axis RANSAC ignores ticks that do not fit a straight line.
 """
 
 import os
-import re
-
+import re #regular expressions (used to check "does this text look like a number / a year?").
 import cv2
 import numpy as np
 import pytesseract
@@ -30,7 +29,11 @@ if os.name == "nt" and os.path.exists(WINDOWS_TESSERACT):
 # HSV separates colour from brightness, so shadows and JPEG noise matter less.
 GREEN_LOW = (40, 60, 120)
 GREEN_HIGH = (90, 255, 255)
-
+"""
+Hue 40–90 ≈ green (0 = red, 60 ≈ green, 120 ≈ blue in OpenCV's scale).
+Saturation ≥ 60 → ignores grey/white background.
+Value ≥ 120 → ignores dark pixels
+"""
 # Chart libraries use "nice" axis steps: 1, 2, 2.5, 4, 5 ... x 10^k.
 NICE_STEPS = (1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.5, 8.0)
 
@@ -47,7 +50,8 @@ def group_runs(indices, max_gap=3):
         else:
             runs.append([i, i])
     return [tuple(r) for r in runs]
-
+#Input: sorted positions (rows or columns that contain something). Output: groups of
+#neighbouring positions.
 
 def ocr(gray_crop, psm=7, words=False):
     """Read digits from a small crop of the image with Tesseract.
@@ -58,7 +62,7 @@ def ocr(gray_crop, psm=7, words=False):
     big = cv2.resize(gray_crop, None, fx=5, fy=5, interpolation=cv2.INTER_CUBIC)
     big = cv2.copyMakeBorder(big, 30, 30, 30, 30, cv2.BORDER_CONSTANT, value=255)
     big = cv2.threshold(big, 170, 255, cv2.THRESH_BINARY)[1]
-    config = f"--psm {psm} -c tessedit_char_whitelist=0123456789."
+    config = f"--psm {psm} -c tessedit_char_whitelist=0123456789." #only digits and a dot are allowed. Tesseract can't return "O" for "0" or "l" for "1".
     if not words:
         return pytesseract.image_to_string(big, config=config).strip()
     # words=True: also return where each word is, in original pixel units
@@ -96,7 +100,17 @@ def ransac_line(xs, ys, tolerance):
                 best_inliers = inliers
     b, a = np.polyfit(xs[best_inliers], ys[best_inliers], 1)
     return a, b, best_inliers
-
+"""
+there are only ~6 points:
+1. Take every pair of points; draw the line through them.
+2. Count how many points lie within tolerance of that line (inliers). inliers is a True/False
+array.
+3. Keep the line with the most inliers.
+4. Refit properly on just those inliers with np.polyfit(..., 1) (degree-1 polynomial = straight
+line; returns [slope, intercept] , hence b, a = ).
+if xs[i] == xs[j]: continue avoids dividing by zero (two labels with the same month number).
+Cost: O(n²) pairs × O(n) check = O(n³) — fine for 6 points.
+"""
 
 # -------------------------------------------------------- the 5 main steps ---
 
@@ -119,7 +133,8 @@ def find_bars(image):
     if not runs:
         raise ValueError("No bars detected inside the chart.")
     typical_width = np.median([end - start + 1 for start, end in runs])
-
+#A column is "part of a bar" if it has more than 3 green pixels and more than 2% of the
+band height (so stray noise pixels don't count).
     bars = []
     for start, end in runs:
         if end - start + 1 < 0.45 * typical_width:
@@ -158,7 +173,7 @@ def read_y_axis(gray, band):
             guesses.append(float(text) / position)
     if not guesses:
         raise ValueError("Could not read any y-axis label.")
-
+#step = value ÷ position
     # Voting: for each candidate step, predict what every label SHOULD say
     # (step 40 -> "0.0", "40.0", "80.0" ...) and count how many labels match.
     # OCR usually gets one digit wrong ("80.0" read as "30.0"), so a label
