@@ -5,7 +5,7 @@ find, explain and change.
 """
 
 from dataclasses import dataclass, asdict
-
+#dataclass is the decorator
 
 @dataclass
 class Assumptions:
@@ -21,7 +21,10 @@ class Assumptions:
     def to_dict(self) -> dict:
         return asdict(self)
 
-
+"""
+It converts the assumptions dataclass into a dictionary using asdict. 
+Right now nothing in the project calls it. I kept it for exporting the settings, for example as JSON from an API.
+"""
 # Indian grid: about 0.71 kg of CO2 per kWh (CEA CO2 baseline database).
 CO2_KG_PER_KWH = 0.71
 
